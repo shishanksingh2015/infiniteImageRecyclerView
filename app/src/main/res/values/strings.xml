@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">InfiniteList</string>
+
+    <string name="image">image</string>
+    <string name="image_count">Image Count</string>
+    <string name="images_downloaded">Number of Images Downloaded are : %d</string>
+</resources>

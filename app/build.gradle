@@ -1,0 +1,130 @@
+
+apply plugin: 'com.android.application'
+
+
+// auto increment version stuff
+import com.shishank.infinitelist.MBIncrementVersionTask
+
+task incrementVersionTask(type: MBIncrementVersionTask)
+tasks.whenTaskAdded { task ->
+    if (task.name == 'generateReleaseBuildConfig') {
+        task.dependsOn 'incrementVersionTask'
+    }
+}
+
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion '26.0.2'
+
+    final API_URL_DEV = "https://www.google.com/";
+    final API_URL_PROD = "https://www.google.com/";
+
+    defaultConfig {
+        applicationId "com.shishank.infinitelist"
+        minSdkVersion 15
+        targetSdkVersion 26
+        versionCode incrementVersionTask.getCurrentVersionCode()
+        versionName incrementVersionTask.getCurrentVersionName()
+
+        // setting custom name for apk
+        project.ext.set("archivesBaseName", "InfinteList-" + defaultConfig.versionName
+                + "-vc" + defaultConfig.versionCode)
+        multiDexEnabled true
+    }
+
+    signingConfigs {
+        // todo change as per app config
+        debugProd {
+            storeFile file("../jumpstart.keystore")
+            storePassword "moldedbits"
+            keyAlias "jumpstart"
+            keyPassword "moldedbits"
+        }
+        release {
+            storeFile file("../jumpstart.keystore")
+            storePassword "moldedbits"
+            keyAlias "jumpstart"
+            keyPassword "moldedbits"
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            minifyEnabled false
+            buildConfigField 'String', 'API_URL', "\"" + API_URL_DEV + "\""
+        }
+
+        release {
+            applicationIdSuffix '.release'
+            buildConfigField 'String', 'API_URL', "\"" + API_URL_DEV + "\""
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    lintOptions {
+        // set to true to turn off analysis progress reporting by lint
+        quiet true
+        // if true, stop the gradle build if errors are found
+        abortOnError false
+        // if true, only report errors
+        ignoreWarnings false
+        // if true, emit full/absolute paths to files with errors (true by default)
+        //absolutePaths true
+        // if true, check all issues, including those that are off by default
+        checkAllWarnings true
+        // if true, treat all warnings as errors
+        warningsAsErrors false
+        // turn off checking the given issue id's
+        disable 'TypographyFractions', 'TypographyQuotes'
+        // turn on the given issue id's
+        enable 'RtlHardcoded', 'RtlCompat', 'RtlEnabled'
+        // check *only* the given issue id's
+        //check 'NewApi', 'InlinedApi'
+        // if true, don't include source code lines in the error output
+        noLines false
+        // if true, show all locations for an error, do not truncate lists, etc.
+        showAll true
+        // Fallback lint configuration (default severities, etc.)
+        lintConfig file("default-lint.xml")
+        // if true, generate a text report of issues (false by default)
+        textReport false
+        // location to write the output; can be a file or 'stdout'
+        textOutput 'stdout'
+        // if true, generate an XML report for use by for example Jenkins
+        xmlReport false
+        // file to write report to (if not specified, defaults to lint-results.xml)
+        xmlOutput file("build/reports/lint/lint-report.xml")
+        // if true, generate an HTML report (with issue explanations, sourcecode, etc)
+        htmlReport true
+        // optional path to report (default will be lint-results.html in the builddir)
+        htmlOutput file("build/reports/lint/lint-report.html")
+    }
+
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:27.1.0'
+    implementation 'com.android.support:design:27.1.0'
+    implementation 'com.android.support:support-v4:27.1.0'
+    // Timber for logging
+    implementation 'com.jakewharton.timber:timber:4.5.1'
+
+    // Butterknife for view injection
+    implementation 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+
+    implementation 'com.jakewharton.rxbinding2:rxbinding-recyclerview-v7:2.0.0'
+
+    implementation 'com.github.bumptech.glide:glide:4.6.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1'
+    implementation 'com.android.support:multidex:1.0.3'
+}
